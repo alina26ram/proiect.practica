@@ -1,0 +1,76 @@
+import math as m
+import numpy as np
+
+
+class SphericalCoordinate:
+    def __init__(self, lat, long):
+        self.lat = lat
+        self.long = long
+
+
+gc1 = SphericalCoordinate(0.0000, 0.0000)
+gc2 = SphericalCoordinate(0.0000, 45.0000)
+
+
+def Azimuth(gc1, gc2):
+    lat1, long1, lat2, long2 = 0, 0, 0, 45
+    dLon = gc2.long - gc1.long
+    y = m.sin(dLon) * m.cos(gc2.lat)
+    x = m.cos(gc1.lat) * m.sin(gc2.lat) - m.sin(gc1.lat) * m.cos(gc2.lat) * m.cos(dLon)
+
+    azimuth = m.atan2(y, x)
+    azimuth = np.rad2deg(azimuth)
+    print('\nazimuth: ', azimuth)
+
+
+def Distance(gc1, gc2):
+    R = 6378137
+    dlon = m.radians(gc2.long) - m.radians(gc1.long)
+    dlat = m.radians(gc2.lat) - m.radians(gc1.lat)
+
+    a = m.sin(dlat / 2) ** 2 + m.cos(gc1.lat) * m.cos(gc2.lat) * m.sin(dlon / 2) ** 2
+    c = 2 * m.atan2(m.sqrt(a), m.sqrt(1 - a))
+
+    distance = R * c
+    print('\ndistance: ', distance)
+
+
+def EndPosition(gc, DoubleAzimuth, darcDistance):
+    R = 6378137
+    lat = m.asin(
+        m.sin(gc.lat) * m.cos(darcDistance / R) + m.cos(gc.lat) * m.sin(darcDistance / R) * m.cos(DoubleAzimuth))
+    long = gc.long + m.atan2(m.sin(DoubleAzimuth) * m.sin(darcDistance / R) * m.cos(gc.lat),
+                             m.cos(darcDistance / R) - m.sin(gc.lat) * m.sin(gc.lat))
+
+    LatEnd = float(m.degrees(lat))
+    LongEnd = float(m.degrees(long))
+
+    print('\nLatitudine finala: {:.4f}'.format(LatEnd))
+    print('longitudine finala: {:.4f}'.format(LongEnd))
+
+
+def Interpolate(DoubleAmount, gc1, gc2):
+    a = DoubleAmount / 2
+    lat = (gc1.lat + gc2.lat) * a
+    long = (gc1.long + gc2.long) * a
+    print('\nlat: ', lat)
+    print('lon: ', long)
+
+
+print(
+    "Choices:\n 1 - Azimuth\n 2 - Distance\n 3 - EndPosition\n 4 - Interpolate\n")
+
+x = input("Please enter your choice:\n")
+
+x = int(x)
+
+if x == 1:
+    Azimuth(gc1, gc2)
+elif x == 2:
+    Distance(gc1, gc2)
+elif x == 3:
+    EndPosition(gc1, 1.5708, 1000)
+elif x == 4:
+    Interpolate(1, gc1, gc2)
+else:
+    print('Wrong choice')
